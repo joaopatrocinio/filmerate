@@ -11,8 +11,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const auth = require('./routes/auth');
-
 app.use(function(req, res, next){
 	global.connection = mysql.createConnection({
 		host     : process.env.DB_HOST,
@@ -24,8 +22,16 @@ app.use(function(req, res, next){
 	next();
 });
 
+const auth = require('./routes/auth');
 app.use('/api/auth', auth)
 
-app.listen(3000, () => {
-    console.log("Server running on port 3000");
+app.get('/', (req, res, next) => {
+	res.send("Servidor do site filmerate.com");
+});
+app.get('/api', (req, res, next) => {
+	res.send("API do FilmeRate");
+});
+
+app.listen(80, () => {
+    console.log("Server running on port 80");
 });
