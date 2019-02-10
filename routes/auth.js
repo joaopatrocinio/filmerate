@@ -6,6 +6,12 @@ const router = express.Router();
 router.post('/login', function(req, res, next) {
     if (req.body.user_email && req.body.user_password) {
         connection.query('SELECT * from user WHERE user_email = ?', [req.body.user_email], function (error, results, fields) {
+            if (!results[0]) {
+                return res.status(401).send({
+                    status: 401,
+                    response: 'Authentication failed, incorrect credencials.'
+                });
+            }
             var passwordIsValid = bcrypt.compareSync(req.body.user_password, results[0].user_password);
             if (!passwordIsValid) {
                 return res.status(401).send({
