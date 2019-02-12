@@ -32,6 +32,6 @@ app.get('/api', (req, res, next) => {
 	res.send("API do FilmeRate");
 });
 
-app.listen(80, () => {
-    console.log("Server running on port 80");
+app.listen(process.env.PORT, () => {
+    console.log("Server running on port " + process.env.PORT);
 });

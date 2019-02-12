@@ -64,4 +64,43 @@ router.get('/me', function (req, res, next) {
     })
 })
 
+router.post('/register', function (req, res, next) {
+    if (
+        !req.body.user_firstname ||
+        !req.body.user_lastname ||
+        !req.body.user_email ||
+        !req.body.user_password ||
+        !req.body.user_data_nascimento ||
+        !req.body.user_sexo_id
+    ) {
+        return res.status(400).send({
+            status: 400,
+            response: 'You are missing necessary data to complete the sign up.'
+        });
+    }
+
+    var salt = bcrypt.genSaltSync(10);
+    var hash = bcrypt.hashSync(req.body.user_password, salt);
+    connection.query("INSERT INTO user (user_firstname, user_lastname, user_email, user_password, user_user_type_id, user_data_nascimento, user_sexo_id) VALUES (?, ?, ?, ?, ?, ?, ?)", [
+        req.body.user_firstname,
+        req.body.user_lastname,
+        req.body.user_email,
+        hash,
+        2, // user type => 2 = regular user
+        req.body.user_data_nascimento,
+        req.body.user_sexo_id
+    ], function(errors, results, fields) {
+        if (!results) {
+            return res.status(500).send({
+                status: 500,
+                response: 'An error occured while trying to create a new user.'
+            });
+        }
+        return res.status(200).send({
+            status: 200,
+            response: 'User created successfully.'
+        });
+    });
+});
+
 module.exports = router;
