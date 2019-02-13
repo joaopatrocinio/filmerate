@@ -11,15 +11,12 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(function(req, res, next){
-	global.connection = mysql.createConnection({
-		host     : process.env.DB_HOST,
-		user     : process.env.DB_USER,
-		password : process.env.DB_PASS,
-		database : process.env.DB_NAME
-	});
-	connection.connect();
-	next();
+// DB
+global.pool = mysql.createPool({
+	host     : process.env.DB_HOST,
+	user     : process.env.DB_USER,
+	password : process.env.DB_PASS,
+	database : process.env.DB_NAME
 });
 
 const auth = require('./routes/auth');
