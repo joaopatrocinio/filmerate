@@ -103,14 +103,15 @@ router.post('/register', function (req, res, next) {
             response: 'Database error. Please try again.'
         });
 
-        connection.query("INSERT INTO user (user_firstname, user_lastname, user_email, user_password, user_user_type_id, user_data_nascimento, user_sexo_id) VALUES (?, ?, ?, ?, ?, ?, ?)", [
+        connection.query("INSERT INTO user (user_firstname, user_lastname, user_email, user_password, user_user_type_id, user_data_nascimento, user_sexo_id, user_pais_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [
             req.body.user_firstname,
             req.body.user_lastname,
             req.body.user_email,
             hash,
             2, // user type => 2 = regular user
             req.body.user_data_nascimento,
-            req.body.user_sexo_id
+            req.body.user_sexo_id,
+            177 // user_pais_id => portugal
         ], function(errors, results, fields) {
             if (!results) {
                 return res.status(500).send({
