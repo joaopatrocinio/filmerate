@@ -21,8 +21,10 @@ global.pool = mysql.createPool({
 
 const auth = require('./routes/auth');
 const filme = require('./routes/filme');
+const scrape = require('./routes/scrape');
 app.use('/api/auth', auth)
 app.use('/api/filme', filme)
+app.use('/api/scrape', scrape)
 
 app.get('/', (req, res, next) => {
 	res.send("Servidor do site filmerate.com");

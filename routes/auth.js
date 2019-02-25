@@ -49,7 +49,7 @@ router.post('/login', function(req, res, next) {
 router.get('/me', function (req, res, next) {
     var token = req.headers['x-access-token'];
     if (!token) return res.status(401).send({
-        status: 400,
+        status: 401,
         response: 'Please include an access token in your request to allow authentication.'
     });
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
