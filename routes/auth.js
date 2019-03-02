@@ -26,7 +26,8 @@ router.post('/login', function(req, res, next) {
                     });
                 }
                 var token = jwt.sign({
-                    id: results[0].user_id
+                    id: results[0].user_id,
+                    user_type: results[0].user_user_type_id
                 }, process.env.JWT_SECRET, {
                     expiresIn: 86400 // expires in 24 hours
                 });
