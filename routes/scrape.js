@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const mdb = require('moviedb')('5e5819372465d1fc14339befc5cd3a1b');
+const mdb = require('moviedb')(process.env.TMDB_API_KEY);
 const moment = require('moment');
 const router= express.Router();
 
