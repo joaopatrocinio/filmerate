@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql');
+const mailer = require('nodemailer');
 
 require('dotenv').config();
 const app = express();
@@ -17,6 +18,17 @@ global.pool = mysql.createPool({
 	user     : process.env.DB_USER,
 	password : process.env.DB_PASS,
 	database : process.env.DB_NAME
+});
+
+// Email
+global.smtpTransport = mailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
 });
 
 const auth = require('./routes/auth');

@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 const router = express.Router();
 
 router.post('/login', function(req, res, next) {
@@ -114,12 +115,29 @@ router.post('/register', function (req, res, next) {
             req.body.user_sexo_id,
             177 // user_pais_id => portugal
         ], function(errors, results, fields) {
-            if (!results) {
+            if (errors) {
+                if (errors.errno == "1062") {
+                    return res.status(500).send({
+                        status: 500,
+                        response: "Email address already registered on the database."
+                    });
+                }
                 return res.status(500).send({
                     status: 500,
                     response: 'An error occured while trying to create a new user.'
                 });
             }
+            var email_registo = fs.createReadStream("public/email_registo.html");
+            let mailOptions = {
+              from: '"FilmeRate" <admin@filmerate.com>', // sender address
+              to: req.body.user_email, // list of receivers
+              subject: "Criação de conta FilmeRate", // Subject line
+              text: "Parabens. A sua conta foi criada com sucesso. Agora já pode fazer as suas próprias reviews, seguir filmes ou pessoas no website para receber as suas últimas notícias, votar em reviews, e mais.", // plain text body
+              html: email_registo // html body
+            };
+        
+            // send mail with defined transport object
+            let info = smtpTransport.sendMail(mailOptions)
             return res.status(200).send({
                 status: 200,
                 response: 'User created successfully.'
