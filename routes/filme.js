@@ -3,6 +3,30 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const router= express.Router();
 
+router.get('/', function(req, res) {
+    pool.getConnection(function (err, connection) {
+        if (err) return res.status(500).send({
+            status: 500,
+            response: 'Database error. Please try again.'
+        });
+        connection.query('SELECT filme_id, filme_title, filme_poster FROM filme', function (error, results, fields) {
+            if (!results[0]) {
+                return res.status(404).send({
+                    status: 404,
+                    response: 'Movie not found.'
+                });
+            }
+
+            return res.status(200).send({
+                status: 200,
+                response: results
+            });
+
+        });
+        connection.release();
+    });
+})
+
 router.get('/:filme_id', function(req, res) {
     pool.getConnection(function (err, connection) {
         if (err) return res.status(500).send({
