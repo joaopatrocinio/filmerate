@@ -27,6 +27,28 @@ router.use(function (req, res, next) {
     })
 })
 
+router.get('/stats', function (req, res) {
+    pool.getConnection(function (err, connection) {
+        connection.query('SELECT COUNT(filme.filme_id) AS "filmes_total" FROM filme; SELECT COUNT(user.user_id) AS "users_total" FROM user;', function (error, results, fields) {
+            if (err) {
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error, please try again."
+                });
+            }
+
+            return res.status(200).send({
+                status: 200,
+                response: {
+                    filmes_total: results[0][0].filmes_total,
+                    users_total: results[1][0].users_total
+                }
+            });
+        });
+        connection.release();
+    });
+});
+
 router.get('/users', function (req, res) {
     pool.getConnection(function (err, connection) {
         if (err) return res.status(500).send({
@@ -74,7 +96,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
                                 response: 'An error occured while trying to add a record on the database. Please try again.'
                             });
                         }
-    
+
                         return res.status(200).send({
                             status: 200,
                             response: results
@@ -82,7 +104,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
                     });
                     connection.release();
                });
-           });
+            });
         }
     });
 })
