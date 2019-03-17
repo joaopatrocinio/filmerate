@@ -28,16 +28,12 @@ router.use(function (req, res, next) {
 })
 
 router.get("/test", function (req, res) {
-    mdb.personInfo({
-        id: 10980
-    }, function (err, person) {
-        return res.send(person);
-    });
+    // test endpoint
 });
 
 router.get('/stats', function (req, res) {
     pool.query('SELECT COUNT(filme.filme_id) AS "filmes_total" FROM filme; SELECT COUNT(user.user_id) AS "users_total" FROM user;', function (error, results, fields) {
-        if (err) {
+        if (error) {
             return res.status(500).send({
                 status: 500,
                 response: "Database error, please try again."
