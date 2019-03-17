@@ -27,6 +27,14 @@ router.use(function (req, res, next) {
     })
 })
 
+router.get("/test", function (req, res) {
+    mdb.personInfo({
+        id: 10980
+    }, function (err, person) {
+        return res.send(person);
+    });
+});
+
 router.get('/stats', function (req, res) {
     pool.query('SELECT COUNT(filme.filme_id) AS "filmes_total" FROM filme; SELECT COUNT(user.user_id) AS "users_total" FROM user;', function (error, results, fields) {
         if (err) {
@@ -109,7 +117,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
                                 mdb.personInfo({
                                     id: credits.crew.find(isDirector).id
                                 }, (err, director) => {
-                                    pool.query('INSERT INTO realizador (realizador_tmdb_id, realizador_nome, realizador_data_nascimento, realizador_imdb_id, realizador_biografia) VALUES (?, ?, ?, ?, ?)', [director.id, director.name, director.birthday, director.imdb_id, director.biography],
+                                    pool.query('INSERT INTO realizador (realizador_tmdb_id, realizador_nome, realizador_data_nascimento, realizador_imdb_id, realizador_biografia, realizador_imagem) VALUES (?, ?, ?, ?, ?, ?)', [director.id, director.name, director.birthday, director.imdb_id, director.biography, 'https://image.tmdb.org/t/p/w500' + director.profile_path],
                                         function (error, resultsInsert, fields) {
                                             if (error) {
                                                 return res.status(500).send({
@@ -162,7 +170,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
                                         mdb.personInfo({
                                             id: cast_id[index]
                                         }, (err, actor) => {
-                                            pool.query('INSERT INTO ator (ator_tmdb_id, ator_nome, ator_data_nascimento, ator_imdb_id, ator_biografia) VALUES (?, ?, ?, ?, ?)', [actor.id, actor.name, actor.birthday, actor.imdb_id, actor.biography],
+                                            pool.query('INSERT INTO ator (ator_tmdb_id, ator_nome, ator_data_nascimento, ator_imdb_id, ator_biografia, ator_imagem) VALUES (?, ?, ?, ?, ?, ?)', [actor.id, actor.name, actor.birthday, actor.imdb_id, actor.biography, 'https://image.tmdb.org/t/p/w500' + actor.profile_path],
                                                 function (error, resultsInsert, fields) {
                                                     if (error) {
                                                         return res.status(500).send({
