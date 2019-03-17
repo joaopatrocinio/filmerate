@@ -39,9 +39,13 @@ global.smtpTransport = mailer.createTransport({
 const auth = require('./routes/auth');
 const filme = require('./routes/filme');
 const admin = require('./routes/admin');
+const ator = require('./routes/ator');
+const realizador = require('./routes/realizador');
 app.use('/api/auth', auth)
 app.use('/api/filme', filme)
 app.use('/api/admin', admin)
+app.use('/api/ator', ator)
+app.use('/api/realizador', realizador)
 
 app.get('/', (req, res, next) => {
 	res.send("Servidor do site filmerate.com");
