@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mdb = require('moviedb')(process.env.TMDB_API_KEY);
 const moment = require('moment');
-const router= express.Router();
+const router = express.Router();
 
 // Route-wide middleware
 router.use(function (req, res, next) {
@@ -28,82 +28,184 @@ router.use(function (req, res, next) {
 })
 
 router.get('/stats', function (req, res) {
-    pool.getConnection(function (err, connection) {
-        connection.query('SELECT COUNT(filme.filme_id) AS "filmes_total" FROM filme; SELECT COUNT(user.user_id) AS "users_total" FROM user;', function (error, results, fields) {
-            if (err) {
-                return res.status(500).send({
-                    status: 500,
-                    response: "Database error, please try again."
-                });
-            }
-
-            return res.status(200).send({
-                status: 200,
-                response: {
-                    filmes_total: results[0][0].filmes_total,
-                    users_total: results[1][0].users_total
-                }
+    pool.query('SELECT COUNT(filme.filme_id) AS "filmes_total" FROM filme; SELECT COUNT(user.user_id) AS "users_total" FROM user;', function (error, results, fields) {
+        if (err) {
+            return res.status(500).send({
+                status: 500,
+                response: "Database error, please try again."
             });
+        }
+
+        return res.status(200).send({
+            status: 200,
+            response: {
+                filmes_total: results[0][0].filmes_total,
+                users_total: results[1][0].users_total
+            }
         });
-        connection.release();
     });
 });
 
 router.get('/users', function (req, res) {
-    pool.getConnection(function (err, connection) {
-        if (err) return res.status(500).send({
-            status: 500,
-            response: 'Database error. Please try again.'
-        });
 
-        connection.query('SELECT user_id, user_firstname, user_lastname, user_email, user_user_type_id FROM user', function (error, results, fields) {
-            if (error) {
-                return res.status(500).send({
-                    status: 500,
-                    response: 'An error occured while trying to add a record on the database. Please try again.'
-                });
-            }
-    
-            return res.status(200).send({
-                status: 200,
-                response: results
+    pool.query('SELECT user_id, user_firstname, user_lastname, user_email, user_user_type_id FROM user', function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({
+                status: 500,
+                response: 'An error occured while trying to add a record on the database. Please try again.'
             });
+        }
+
+        return res.status(200).send({
+            status: 200,
+            response: results
         });
-        connection.release();
-    })
+    });
 })
 
 router.post('/scrape/:filme_imdb', function (req, res) {
-    mdb.find({ id: req.params.filme_imdb, external_source: 'imdb_id'}, (err, data) => {
+    var filme_id;
+
+    mdb.find({
+        id: req.params.filme_imdb,
+        external_source: 'imdb_id'
+    }, (err, data) => {
         if (data.movie_results[0]) {
-            mdb.movieInfo({ id: data.movie_results[0].id }, (err, movie) => {
-                pool.getConnection(function (err, connection) {
-                    if (err) return res.status(500).send({
-                        status: 500,
-                        response: 'Database error. Please try again.'
-                    });
-                    connection.query('INSERT INTO filme (filme_imdb, filme_title, filme_sinopse, filme_data_estreia, filme_duracao, filme_poster) VALUES (?, ?, ?, ?, ?, ?)', [movie.imdb_id, movie.original_title, movie.overview, moment(movie.release_date).format('YYYY-MM-DD'), movie.runtime, 'https://image.tmdb.org/t/p/w500' + movie.poster_path], function (error, results, fields) {
-                        if (error) {
-                            if (error.errno == "1062") {
-                                return res.status(500).send({
-                                    status: 500,
-                                    response: "Movie already exists on the database."
-                                });
-                            }
-    
+            mdb.movieInfo({
+                id: data.movie_results[0].id
+            }, (err, movie) => {
+                pool.query('INSERT INTO filme (filme_imdb, filme_title, filme_sinopse, filme_data_estreia, filme_duracao, filme_poster) VALUES (?, ?, ?, ?, ?, ?)', [movie.imdb_id, movie.original_title, movie.overview, moment(movie.release_date).format('YYYY-MM-DD'), movie.runtime, 'https://image.tmdb.org/t/p/w500' + movie.poster_path], function (error, results, fields) {
+                    if (error) {
+                        if (error.errno == "1062") {
                             return res.status(500).send({
                                 status: 500,
-                                response: 'An error occured while trying to add a record on the database. Please try again.'
+                                response: "Movie already exists on the database."
                             });
                         }
 
-                        return res.status(200).send({
-                            status: 200,
-                            response: results
+                        return res.status(500).send({
+                            status: 500,
+                            response: 'An error occured while trying to add a record on the database. Please try again.'
                         });
+                    }
+                    filme_id = results.insertId;
+
+                    mdb.movieCredits({
+                        id: data.movie_results[0].id
+                    }, (err, credits) => {
+                        function isDirector(crew) {
+                            return crew.job == "Director";
+                        }
+                        // director
+                        pool.query('SELECT realizador_id FROM realizador WHERE realizador_tmdb_id=?', [credits.crew.find(isDirector).id], (error, results, fields) => {
+                            if (error) {
+                                return res.status(500).send({
+                                    status: 500,
+                                    response: 'An error occured.'
+                                });
+                            }
+        
+                            if (!results[0]) {
+                                mdb.personInfo({
+                                    id: credits.crew.find(isDirector).id
+                                }, (err, director) => {
+                                    pool.query('INSERT INTO realizador (realizador_tmdb_id, realizador_nome, realizador_data_nascimento, realizador_imdb_id, realizador_biografia) VALUES (?, ?, ?, ?, ?)', [director.id, director.name, director.birthday, director.imdb_id, director.biography],
+                                        function (error, resultsInsert, fields) {
+                                            if (error) {
+                                                return res.status(500).send({
+                                                    status: 500,
+                                                    response: "An error occured while inserting the director on the database."
+                                                });
+                                            } else {
+                                                pool.query('UPDATE filme SET filme_realizador_id=? WHERE filme_imdb=?', [resultsInsert.insertId, req.params.filme_imdb], (error, results, fields) => {
+                                                    if (error) {
+                                                        return res.status(500).send({
+                                                            status: 500,
+                                                            response: "An error occured while linking the director to the movie."
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+                                });
+                            } else {
+                                pool.query('UPDATE filme SET filme_realizador_id=? WHERE filme_imdb=?', [results[0].realizador_id, req.params.filme_imdb], (error, results, fields) => {
+                                    if (error) {
+                                        return res.status(500).send({
+                                            status: 500,
+                                            response: "An error occured while linking the director to the movie."
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        // actors
+                        var cast_id = [];
+                        for (i = 0; i < 3; i++) {
+                            cast_id.push(credits.cast[i].id);
+                        }
+        
+                        // synchronously adding actors to the database
+                        var index = 0;
+                    
+                        function loadCast() {
+                            if (index < cast_id.length) {
+                                pool.query('SELECT ator_id FROM ator WHERE ator_tmdb_id=?', [cast_id[index]], (error, results, fields) => {
+                                    if (error) {
+                                        return res.status(500).send({
+                                            status: 500,
+                                            response: 'An error occured.'
+                                        });
+                                    }
+                
+                                    if (!results[0]) {
+                                        mdb.personInfo({
+                                            id: cast_id[index]
+                                        }, (err, actor) => {
+                                            pool.query('INSERT INTO ator (ator_tmdb_id, ator_nome, ator_data_nascimento, ator_imdb_id, ator_biografia) VALUES (?, ?, ?, ?, ?)', [actor.id, actor.name, actor.birthday, actor.imdb_id, actor.biography],
+                                                function (error, resultsInsert, fields) {
+                                                    if (error) {
+                                                        return res.status(500).send({
+                                                            status: 500,
+                                                            response: "An error occured while inserting the actor on the database."
+                                                        });
+                                                    } else {
+                                                        pool.query('INSERT INTO filme_ator (filme_ator_filme_id, filme_ator_ator_id) VALUES (?, ?)', [filme_id, resultsInsert.insertId], (error, results, fields) => {
+                                                            if (error) {
+                                                                return res.status(500).send({
+                                                                    status: 500,
+                                                                    error: error
+                                                                });
+                                                            }
+                                                            ++index;
+                                                            loadCast();
+                                                        });
+                                                    }
+                                                });
+                                        });
+                                    } else {
+                                        pool.query('INSERT INTO filme_ator (filme_ator_filme_id, filme_ator_ator_id) VALUES (?, ?)', [filme_id, results[0].ator_id], (error, results, fields) => {
+                                            if (error) {
+                                                return res.status(500).send({
+                                                    status: 500,
+                                                    error: error
+                                                });
+                                            }
+                                            ++index;
+                                            loadCast();
+                                        });
+                                    }
+                                });
+                            } else {
+                                return res.status(200).send({
+                                    status: 200,
+                                    response: "Database insert completed successfully."
+                                });
+                            }
+                        }
+                        loadCast();
                     });
-                    connection.release();
-               });
+                });
             });
         }
     });

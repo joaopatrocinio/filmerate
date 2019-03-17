@@ -21,6 +21,10 @@ global.pool = mysql.createPool({
   multipleStatements: true
 });
 
+pool.on('enqueue', function () {
+  console.log('A MySQL query is in queue, this means the maximum value for connections has been reached.');
+});
+
 // Email
 global.smtpTransport = mailer.createTransport({
     host: process.env.EMAIL_HOST,
