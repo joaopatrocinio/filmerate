@@ -24,7 +24,7 @@ router.get('/', function(req, res) {
     });
 })
 
-router.get('/:size/:page', function (req, res) {
+router.get('/size/:size/page/:page', function (req, res) {
     var size = req.params.size;
     var page = req.params.page;
     if (size >= 1 && page >= 1) {
@@ -75,7 +75,7 @@ router.get('/:filme_id', function(req, res) {
 })
 
 router.get('/atores/:filme_id', function (req, res) {
-    connection.query('SELECT filme_id, ator_id, ator_nome FROM filme LEFT JOIN filme_ator ON filme_ator.filme_ator_filme_id = filme.filme_id LEFT JOIN ator ON ator.ator_id = filme_ator.filme_ator_ator_id WHERE filme.filme_id = ?', [req.params.filme_id], function (error, results, fields) {
+    pool.query('SELECT filme_id, ator_id, ator_nome FROM filme LEFT JOIN filme_ator ON filme_ator.filme_ator_filme_id = filme.filme_id LEFT JOIN ator ON ator.ator_id = filme_ator.filme_ator_ator_id WHERE filme.filme_id = ?', [req.params.filme_id], function (error, results, fields) {
         if (error) return res.status(500).send({
             status: 500,
             response: 'Database error. Please try again.'
