@@ -32,7 +32,7 @@ router.get("/test", function (req, res) {
 });
 
 router.get('/stats', function (req, res) {
-    pool.query('SELECT COUNT(filme.filme_id) AS "filmes_total" FROM filme; SELECT COUNT(user.user_id) AS "users_total" FROM user;', function (error, results, fields) {
+    pool.query('SELECT COUNT(filme.filme_id) AS "filmes_total" FROM filme; SELECT COUNT(user.user_id) AS "users_total" FROM user; SELECT COUNT(ator.ator_id) AS "actors_total" FROM ator; SELECT COUNT(realizador.realizador_id) AS "directors_total" FROM realizador;', function (error, results, fields) {
         if (error) {
             return res.status(500).send({
                 status: 500,
@@ -44,7 +44,9 @@ router.get('/stats', function (req, res) {
             status: 200,
             response: {
                 filmes_total: results[0][0].filmes_total,
-                users_total: results[1][0].users_total
+                users_total: results[1][0].users_total,
+                actors_total: results[2][0].actors_total,
+                directors_total: results[3][0].directors_total
             }
         });
     });
