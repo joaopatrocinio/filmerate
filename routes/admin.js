@@ -94,7 +94,29 @@ router.post('/scrape/:filme_imdb', function (req, res) {
                             response: 'An error occured while trying to add a record on the database. Please try again.'
                         });
                     }
+
                     filme_id = results.insertId;
+
+                    // genres
+                    for (i = 0; i < movie.genres.length; i++) {
+                        pool.query('SELECT * FROM genero WHERE genero_tmdb_id = ?', [movie.genres[i].id], function (error, results, fields) {
+                            if (error) {
+                                return res.status(500).send({
+                                    status: 500,
+                                    response: 'Database error. Please try again.'
+                                });
+                            }
+
+                            pool.query('INSERT INTO filme_genero (filme_genero_filme_id, filme_genero_genero_id) VALUES (?, ?)', [filme_id, results[0].genero_id], function (error, results, fields) {
+                                if (error) {
+                                    return res.status(500).send({
+                                        status: 500,
+                                        response: 'Database error. Please try again.'
+                                    });
+                                }
+                            });
+                        });
+                    }
 
                     mdb.movieCredits({
                         id: data.movie_results[0].id
