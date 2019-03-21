@@ -95,4 +95,25 @@ router.get('/atores/:filme_id', function (req, res) {
     });
 })
 
+router.get('/search/:query', function (req, res) {
+    pool.query("SELECT filme_id, filme_title, filme_poster FROM filme WHERE filme_title LIKE '%" + this.escape(req.params.query) + "%'", function (error, results, fields) {
+        if (error) return res.status(500).send({
+            status: 500,
+            response: error
+        });
+
+        if (!results[0]) {
+            return res.status(404).send({
+                status: 404,
+                response: 'Movie not found.'
+            });
+        }
+
+        return res.status(200).send({
+            status: 200,
+            response: results
+        });
+    });
+});
+
 module.exports = router;
