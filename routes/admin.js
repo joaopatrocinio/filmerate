@@ -80,7 +80,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
             mdb.movieInfo({
                 id: data.movie_results[0].id
             }, (err, movie) => {
-                pool.query('INSERT INTO filme (filme_imdb, filme_title, filme_sinopse, filme_data_estreia, filme_duracao, filme_poster) VALUES (?, ?, ?, ?, ?, ?)', [movie.imdb_id, movie.original_title, movie.overview, moment(movie.release_date).format('YYYY-MM-DD'), movie.runtime, 'https://image.tmdb.org/t/p/w500' + movie.poster_path], function (error, results, fields) {
+                pool.query('INSERT INTO filme (filme_imdb, filme_title, filme_sinopse, filme_data_estreia, filme_duracao, filme_poster, filme_ano) VALUES (?, ?, ?, ?, ?, ?, ?)', [movie.imdb_id, movie.original_title, movie.overview, moment(movie.release_date).format('YYYY-MM-DD'), movie.runtime, 'https://image.tmdb.org/t/p/w500' + movie.poster_path, moment(movie.release_date).format('YYYY')], function (error, results, fields) {
                     if (error) {
                         if (error.errno == "1062") {
                             return res.status(500).send({
