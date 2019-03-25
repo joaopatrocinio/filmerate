@@ -93,4 +93,64 @@ router.post('/myList/delete', function (req, res) {
     }
 })
 
+router.post('/review/like', function (req, res) {
+    if (req.body.filme_classificacao_id) {
+        pool.query("INSERT INTO filme_classificacao_score (filme_classificacao_score_filme_classificacao_id, filme_classificacao_score_user_id, filme_classificacao_score_updown) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE filme_classificacao_score_updown=1", [req.body.filme_classificacao_id, user_id], function (error, results, fields) {
+            if (error) {
+                if (error.errno == "1062") {
+                    return res.status(400).send({
+                        status: 400,
+                        response: "You already have a score on this review."
+                    });
+                }
+
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error. Please try again."
+                })
+            }
+
+            return res.status(200).send({
+                status: 200,
+                response: "Like OK"
+            })
+        });
+    } else {
+        return res.status(500).send({
+            status: 400,
+            response: 'You must include the review ID in the body of the request.'
+        })
+    }
+})
+
+router.post('/review/dislike', function (req, res) {
+    if (req.body.filme_classificacao_id) {
+        pool.query("INSERT INTO filme_classificacao_score (filme_classificacao_score_filme_classificacao_id, filme_classificacao_score_user_id, filme_classificacao_score_updown) VALUES (?, ?, 0) ON DUPLICATE KEY UPDATE filme_classificacao_score_updown=0", [req.body.filme_classificacao_id, user_id], function (error, results, fields) {
+            if (error) {
+                if (error.errno == "1062") {
+                    return res.status(400).send({
+                        status: 400,
+                        response: "You already have a score on this review."
+                    });
+                }
+
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error. Please try again."
+                })
+            }
+
+            return res.status(200).send({
+                status: 200,
+                response: "Dislike OK"
+            })
+        });
+    } else {
+        return res.status(500).send({
+            status: 400,
+            response: 'You must include the review ID in the body of the request.'
+        })
+    }
+})
+
 module.exports = router;
