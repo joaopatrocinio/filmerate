@@ -44,6 +44,7 @@ const realizador = require('./routes/realizador');
 const genero = require('./routes/genero');
 const review = require('./routes/review');
 const ano = require('./routes/ano');
+const user = require('./routes/user');
 app.use('/api/auth', auth)
 app.use('/api/filme', filme)
 app.use('/api/admin', admin)
@@ -52,6 +53,7 @@ app.use('/api/realizador', realizador)
 app.use('/api/genero', genero)
 app.use('/api/review', review)
 app.use('/api/ano', ano)
+app.use('/api/user', user)
 
 app.get('/', (req, res, next) => {
 	res.send("Servidor do site filmerate.com");
