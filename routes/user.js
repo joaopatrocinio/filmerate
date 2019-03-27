@@ -40,8 +40,44 @@ router.get('/myList', function(req, res) {
     });
 })
 
+router.post('/myList/verify', function (req, res) {
+    if (parseInt(req.body.filme_id)) {
+        pool.query("SELECT * FROM filme_user_list WHERE filme_user_list_filme_id = ? AND filme_user_list_user_id = ?", [req.body.filme_id, user_id], function (error, results, fields) {
+            if (error) {
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error. Please try again."
+                })
+            }
+
+            if (results[0]) {
+                return res.status(200).send({
+                    status: 200,
+                    response: {
+                        filme_id: parseInt(req.body.filme_id),
+                        watchlist: true
+                    }
+                })
+            } else {
+                return res.status(200).send({
+                    status: 200,
+                    response: {
+                        filme_id: parseInt(req.body.filme_id),
+                        watchlist: false
+                    }
+                })
+            }
+        })
+    } else {
+        return res.status(500).send({
+            status: 400,
+            response: 'You must include the movie ID in the body of the request.'
+        })
+    }
+})
+
 router.post('/myList/add', function (req, res) {
-    if (req.body.filme_id) {
+    if (parseInt(req.body.filme_id)) {
         pool.query("INSERT INTO filme_user_list (filme_user_list_filme_id, filme_user_list_user_id) VALUES (?, ?)", [req.body.filme_id, user_id], function (error, results, fields) {
             if (error) {
                 if (error.errno == "1062") {
@@ -71,7 +107,7 @@ router.post('/myList/add', function (req, res) {
 })
 
 router.post('/myList/delete', function (req, res) {
-    if (req.body.filme_id) {
+    if (parseInt(req.body.filme_id)) {
         pool.query("DELETE FROM filme_user_list WHERE filme_user_list_filme_id = ? AND filme_user_list_user_id = ?", [req.body.filme_id, user_id], function (error, results, fields) {
             if (error) {
                 return res.status(500).send({
@@ -94,7 +130,7 @@ router.post('/myList/delete', function (req, res) {
 })
 
 router.post('/review/like', function (req, res) {
-    if (req.body.filme_classificacao_id) {
+    if (parseInt(req.body.filme_classificacao_id)) {
         pool.query("INSERT INTO filme_classificacao_score (filme_classificacao_score_filme_classificacao_id, filme_classificacao_score_user_id, filme_classificacao_score_updown) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE filme_classificacao_score_updown=1", [req.body.filme_classificacao_id, user_id], function (error, results, fields) {
             if (error) {
                 if (error.errno == "1062") {
@@ -124,7 +160,7 @@ router.post('/review/like', function (req, res) {
 })
 
 router.post('/review/dislike', function (req, res) {
-    if (req.body.filme_classificacao_id) {
+    if (parseInt(req.body.filme_classificacao_id)) {
         pool.query("INSERT INTO filme_classificacao_score (filme_classificacao_score_filme_classificacao_id, filme_classificacao_score_user_id, filme_classificacao_score_updown) VALUES (?, ?, 0) ON DUPLICATE KEY UPDATE filme_classificacao_score_updown=0", [req.body.filme_classificacao_id, user_id], function (error, results, fields) {
             if (error) {
                 if (error.errno == "1062") {
