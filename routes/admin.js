@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mdb = require('moviedb')(process.env.TMDB_API_KEY);
 const moment = require('moment');
+const faker = require('faker');
 const router = express.Router();
 
 // Route-wide middleware
@@ -27,8 +28,22 @@ router.use(function (req, res, next) {
     })
 })
 
-router.get("/test", function (req, res) {
-    // test endpoint
+router.get("/faker/newUser", function (req, res) {
+    var salt = bcrypt.genSaltSync(10);
+    var hash = bcrypt.hashSync(faker.internet.password(), salt);
+    pool.query('INSERT INTO user (user_firstname, user_lastname, user_email, user_password, user_user_type_id, user_data_nascimento, user_sexo_id, user_pais_id, user_bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [faker.name.firstName(), faker.name.lastName(), faker.internet.email(), hash, 2, moment(faker.date.past()).format('YYYY-MM-DD'), Math.floor(Math.random() * 2) + 1, 177, faker.lorem.paragraph()], function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({
+                status: 500,
+                response: "Database error, please try again."
+            });
+        }
+
+        return res.status(200).send({
+            status: 200,
+            response: 'Fake user inserted.'
+        });
+    });
 });
 
 router.get('/stats', function (req, res) {

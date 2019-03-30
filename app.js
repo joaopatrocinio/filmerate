@@ -5,12 +5,14 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql');
 const mailer = require('nodemailer');
+const faker = require('faker');
 
 require('dotenv').config();
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+faker.locale = process.env.FAKER_LOCALE;
 
 // DB
 global.pool = mysql.createPool({
