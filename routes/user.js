@@ -24,7 +24,7 @@ router.use(function (req, res, next) {
 })
 
 router.get('/myList', function(req, res) {
-    pool.query("SELECT filme_user_list.*, filme_title, filme_poster FROM filme_user_list INNER JOIN filme ON filme_id = filme_user_list_filme_id WHERE filme_user_list_user_id = ?", [user_id], function (error, results, fields) {
+    pool.query("SELECT filme_user_list.*, filme_title, filme_poster, filme_ano, filme_duracao, realizador_nome FROM filme_user_list INNER JOIN filme ON filme_id = filme_user_list_filme_id INNER JOIN realizador ON filme_realizador_id = realizador_id WHERE filme_user_list_user_id = ?", [user_id], function (error, results, fields) {
         if (!results[0]) {
             return res.status(404).send({
                 status: 404,
