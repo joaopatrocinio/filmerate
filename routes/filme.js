@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const router= express.Router();
 
 router.get('/', function(req, res) {
-    pool.query('SELECT filme_id, filme_title, filme_poster FROM filme', function (error, results, fields) {
+    pool.query('SELECT filme_id, filme_title, filme_poster FROM filme ORDER BY filme_data_estreia DESC', function (error, results, fields) {
         if (error) return res.status(500).send({
             status: 500,
             response: 'Database error. Please try again.'
@@ -28,7 +28,7 @@ router.get('/size/:size/page/:page', function (req, res) {
     var size = req.params.size;
     var page = req.params.page;
     if (size >= 1 && page >= 1) {
-        pool.query('SELECT filme_id, filme_title, filme_poster FROM filme LIMIT ? OFFSET ?', [parseInt(size), (page - 1) * size], function(error, results, fields) {
+        pool.query('SELECT filme_id, filme_title, filme_poster FROM filme ORDER BY filme_data_estreia DESC LIMIT ? OFFSET ?', [parseInt(size), (page - 1) * size], function(error, results, fields) {
             if (error) return res.status(500).send({
                 status: 500,
                 response: "Database error. Please try again."
@@ -120,7 +120,7 @@ router.get('/search/:query/size/:size/page/:page', function (req, res) {
     var size = req.params.size;
     var page = req.params.page;
     if (size >= 1 && page >= 1) {
-        pool.query("SELECT filme_id, filme_title, filme_poster FROM filme WHERE filme_title LIKE '%" + this.escape(req.params.query) + "%' LIMIT ? OFFSET ?", [parseInt(size), (page - 1) * size], function (error, results, fields) {
+        pool.query("SELECT filme_id, filme_title, filme_poster FROM filme WHERE filme_title LIKE '%" + this.escape(req.params.query) + "%' ORDER BY filme_data_estreia DESC LIMIT ? OFFSET ?", [parseInt(size), (page - 1) * size], function (error, results, fields) {
             if (error) return res.status(500).send({
                 status: 500,
                 response: error
