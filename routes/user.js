@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const moment = require('moment');
 const router= express.Router();
 
 var user_id;
@@ -185,6 +186,54 @@ router.post('/review/dislike', function (req, res) {
         return res.status(500).send({
             status: 400,
             response: 'You must include the review ID in the body of the request.'
+        })
+    }
+})
+
+router.post('/review/add', function (req, res) {
+    var filme_id = parseInt(req.body.filme_id);
+    var titulo = req.body.filme_classificacao_titulo;
+    var corpo = req.body.filme_classificacao_corpo;
+    var roteiro = parseInt(req.body.filme_classificacao_roteiro);
+    var atores = parseInt(req.body.filme_classificacao_atores);
+    var cenario = parseInt(req.body.filme_classificacao_cenario);
+    var execucao = parseInt(req.body.filme_classificacao_execucao);
+    var data = moment().format('YYYY-MM-DD HH:mm:ss');
+
+    var media = Number(Math.round((((roteiro + atores + cenario + execucao) / 4))+'e'+0)+'e-'+0);
+
+    if (filme_id && titulo && corpo && roteiro && atores && cenario && execucao && data && media) {
+        pool.query('INSERT INTO filme_classificacao (filme_classificacao_filme_id, filme_classificacao_user_id, filme_classificacao_titulo, filme_classificacao_corpo, filme_classificacao_roteiro, filme_classificacao_atores, filme_classificacao_cenario, filme_classificacao_execucao, filme_classificacao_media, filme_classificacao_data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [filme_id, user_id, titulo, corpo, roteiro, atores, cenario, execucao, media, data], function (error, results, fields) {
+            if (error) {
+                if (error.errno == "1062") {
+                    return res.status(400).send({
+                        status: 400,
+                        response: "You already have a review for this movie."
+                    });
+                }
+                return res.status(500).send({
+                    status: 500,
+                    response: 'Database error. Please try again.'
+                });
+            }
+
+            pool.query('INSERT INTO filme_classificacao_score (filme_classificacao_score_filme_classificacao_id, filme_classificacao_score_user_id, filme_classificacao_score_updown) VALUES (?, ?, ?)', [results.insertId, user_id, 1], function (error, results, fields)  {
+                if (error) {
+                    return res.status(500).send({
+                        status: 500,
+                        response: 'Database error. Please try again.'
+                    })
+                }
+                return res.status(200).send({
+                    status: 200,
+                    response: 'Review sucessfully inserted.'
+                });
+            });
+        });
+    } else {
+        return res.status(500).send({
+            status: 400,
+            response: 'Invalid request, please include all necessary data.'
         })
     }
 })
