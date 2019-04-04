@@ -10,3 +10,4 @@ Node.js API backend
 - Moment.js
 - Nodemailer
 - dotenv
+- faker.js
