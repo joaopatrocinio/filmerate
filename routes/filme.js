@@ -24,6 +24,22 @@ router.get('/', function(req, res) {
     });
 })
 
+router.get('/count', function (req, res) {
+	pool.query("SELECT COUNT(filme_id) AS 'filmes_count' FROM filme", function (error, results, fields) {
+		if (error) {
+			return res.status(500).send({
+				status: 500,
+				response: "Database error. Please try again."
+			});
+		}
+		
+		return res.status(200).send({
+			status: 200,
+			response: results[0]
+		});
+	});
+});
+
 router.get('/size/:size/page/:page', function (req, res) {
     var size = req.params.size;
     var page = req.params.page;
