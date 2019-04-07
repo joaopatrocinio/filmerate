@@ -238,4 +238,20 @@ router.post('/review/add', function (req, res) {
     }
 })
 
+router.get('/reviews', function (req, res) {
+    pool.query("SELECT sum(CASE filme_classificacao_score_updown WHEN '1' THEN 1 ELSE 0 END) AS 'likes', sum(CASE filme_classificacao_score_updown WHEN '0' THEN 1 ELSE 0 END ) AS 'dislikes', filme_title, filme_poster, filme_classificacao.* FROM filme_classificacao LEFT JOIN filme ON filme_id = filme_classificacao_filme_id LEFT JOIN filme_classificacao_score ON filme_classificacao_score_filme_classificacao_id = filme_classificacao_id WHERE filme_classificacao_user_id = ? GROUP BY filme_classificacao_id ORDER BY filme_classificacao_data DESC", [user_id], function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({
+                status: 500,
+                response: error
+            })
+        }
+
+        return res.status(200).send({
+            status: 200,
+            response: results
+        })
+    })
+})
+
 module.exports = router;
