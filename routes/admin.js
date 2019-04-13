@@ -68,7 +68,6 @@ router.get('/stats', function (req, res) {
 });
 
 router.get('/users', function (req, res) {
-
     pool.query('SELECT user_id, user_firstname, user_lastname, user_email, user_user_type_id FROM user', function (error, results, fields) {
         if (error) {
             return res.status(500).send({
@@ -83,6 +82,37 @@ router.get('/users', function (req, res) {
         });
     });
 })
+
+router.post('/filme/edit', function (req, res) {
+    var filme_id = req.body.filme_id;
+    var filme_title = req.body.filme_title;
+    var filme_sinopse = req.body.filme_sinopse || null;
+    var filme_duracao = req.body.filme_duracao || null;
+    var filme_data_estreia = moment(req.body.filme_data_estreia).format('YYYY-MM-DD');
+    var filme_ano = moment(filme_data_estreia).format('YYYY');
+    var filme_poster = req.body.filme_poster;
+
+    if (filme_id && filme_title && filme_data_estreia && filme_poster) {
+        pool.query('UPDATE filme SET filme_title = ?, filme_sinopse = ?, filme_duracao = ?, filme_data_estreia = ?, filme_poster = ?, filme_ano = ? WHERE filme_id = ?', [filme_title, filme_sinopse, filme_duracao, filme_data_estreia, filme_poster, filme_ano, filme_id], function (error, results, fields) {
+            if (error) {
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error. Please try again."
+                })
+            }
+
+            return res.status(200).send({
+                status: 200,
+                response: "Update success."
+            })
+        });
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Please include all necessary data to edit this movie."
+        });
+    }
+});
 
 router.post('/scrape/:filme_imdb', function (req, res) {
     var filme_id;
