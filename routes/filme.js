@@ -185,4 +185,25 @@ router.get('/search/:query/size/:size/page/:page', function (req, res) {
     }
 });
 
+router.get('/media/:filme_id', function (req, res) {
+    pool.query("SELECT avg(filme_classificacao_media) AS 'filme_reviews_avg' FROM filme_classificacao WHERE filme_classificacao_filme_id = ? GROUP BY filme_classificacao_filme_id", [req.params.filme_id], function (error, result, fields) {
+        if (error) return res.status(500).send({
+            status: 500,
+            response: error
+        });
+
+        if (!result[0]) {
+            return res.status(404).send({
+                status: 404,
+                response: "Movie not found, or movie doesn't have any reviews."
+            });
+        }
+
+        return res.status(200).send({
+            status: 200,
+            response: result
+        });
+    });
+})
+
 module.exports = router;
