@@ -90,6 +90,29 @@ router.get('/:filme_id', function(req, res) {
     });
 })
 
+router.get('/reviews/:filme_id', function(req, res) {
+    pool.query("SELECT sum(CASE filme_classificacao_score_updown WHEN '1' THEN 1 ELSE 0 END) AS 'likes', sum(CASE filme_classificacao_score_updown WHEN '0' THEN 1 ELSE 0 END ) AS 'dislikes', filme_title, user_firstname, user_lastname, filme_classificacao.* FROM filme_classificacao LEFT JOIN filme ON filme_id = filme_classificacao_filme_id LEFT JOIN filme_classificacao_score ON filme_classificacao_score_filme_classificacao_id = filme_classificacao_id LEFT JOIN user ON filme_classificacao_user_id = user_id WHERE filme_classificacao_filme_id = ? GROUP BY filme_classificacao_id ORDER BY filme_classificacao_data DESC", [req.params.filme_id], function (error, result, fields) {
+        if (error) {
+            return res.status(500).send({
+                status: 500,
+                response: "Database error. Please try again."
+            });
+        }
+
+        if (result[0]) {
+            return res.status(200).send({
+                status: 200,
+                response: result
+            });
+        } else {
+            return res.status(404).send({
+                status: 404,
+                response: "No reviews found for that movie."
+            });
+        }
+    });
+})
+
 router.get('/atores/:filme_id', function (req, res) {
     pool.query('SELECT filme_id, ator_id, ator_nome FROM filme LEFT JOIN filme_ator ON filme_ator.filme_ator_filme_id = filme.filme_id LEFT JOIN ator ON ator.ator_id = filme_ator.filme_ator_ator_id WHERE filme.filme_id = ?', [req.params.filme_id], function (error, results, fields) {
         if (error) return res.status(500).send({
