@@ -271,6 +271,50 @@ router.get('/reviews/new', function(req, res) {
     });
 })
 
+router.get('/reviews/top', function(req, res) {
+    pool.query("SELECT sum(CASE filme_classificacao_score_updown WHEN '1' THEN 1 ELSE 0 END) AS 'likes', sum(CASE filme_classificacao_score_updown WHEN '0' THEN 1 ELSE 0 END ) AS 'dislikes', sum(CASE WHEN filme_classificacao_score_updown = '1' AND filme_classificacao_score_user_id = ? THEN 1 ELSE 0 END ) AS 'liked', sum(CASE WHEN filme_classificacao_score_updown = '0' AND filme_classificacao_score_user_id = ? THEN 1 ELSE 0 END ) AS 'disliked', filme_title, user_firstname, user_lastname, filme_poster, filme_classificacao.* FROM filme_classificacao LEFT JOIN filme ON filme_id = filme_classificacao_filme_id LEFT JOIN filme_classificacao_score ON filme_classificacao_score_filme_classificacao_id = filme_classificacao_id LEFT JOIN user ON filme_classificacao_user_id = user_id GROUP BY filme_classificacao_id ORDER BY likes DESC LIMIT 5 OFFSET 0", [user_id, user_id], function (error, results, fields) {
+        if (!results[0]) {
+            return res.status(404).send({
+                status: 404,
+                response: 'Reviews not found.'
+            });
+        }
+
+        return res.status(200).send({
+            status: 200,
+            response: results
+        });
+
+    });
+})
+
+router.get('/reviews/trending', function(req, res) {
+
+    var data_trending = moment().subtract(2, 'days').format('YYYY-MM-DD HH:mm:SS');
+    var data_now = moment().format('YYYY-MM-DD HH:mm:SS');
+
+    pool.query("SELECT sum(CASE filme_classificacao_score_updown WHEN '1' THEN 1 ELSE 0 END) AS 'likes', sum(CASE filme_classificacao_score_updown WHEN '0' THEN 1 ELSE 0 END ) AS 'dislikes', sum(CASE WHEN filme_classificacao_score_updown = '1' AND filme_classificacao_score_user_id = ? THEN 1 ELSE 0 END ) AS 'liked', sum(CASE WHEN filme_classificacao_score_updown = '0' AND filme_classificacao_score_user_id = ? THEN 1 ELSE 0 END ) AS 'disliked', filme_title, user_firstname, user_lastname, filme_poster, filme_classificacao.* FROM filme_classificacao LEFT JOIN filme ON filme_id = filme_classificacao_filme_id LEFT JOIN filme_classificacao_score ON filme_classificacao_score_filme_classificacao_id = filme_classificacao_id LEFT JOIN user ON filme_classificacao_user_id = user_id WHERE filme_classificacao_data BETWEEN ? AND ? GROUP BY filme_classificacao_id ORDER BY likes DESC LIMIT 5 OFFSET 0", [user_id, user_id, data_trending, data_now], function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({
+                status: 500,
+                response: error
+            })
+        }
+        if (!results[0]) {
+            return res.status(404).send({
+                status: 404,
+                response: 'Reviews not found.'
+            });
+        }
+
+        return res.status(200).send({
+            status: 200,
+            response: results
+        });
+
+    });
+})
+
 router.get('/filme/reviews/:filme_id', function(req, res) {
     pool.query("SELECT sum(CASE filme_classificacao_score_updown WHEN '1' THEN 1 ELSE 0 END) AS 'likes', sum(CASE filme_classificacao_score_updown WHEN '0' THEN 1 ELSE 0 END ) AS 'dislikes', sum(CASE WHEN filme_classificacao_score_updown = '1' AND filme_classificacao_score_user_id = ? THEN 1 ELSE 0 END ) AS 'liked', sum(CASE WHEN filme_classificacao_score_updown = '0' AND filme_classificacao_score_user_id = ? THEN 1 ELSE 0 END ) AS 'disliked', filme_title, user_firstname, user_lastname, filme_classificacao.* FROM filme_classificacao LEFT JOIN filme ON filme_id = filme_classificacao_filme_id LEFT JOIN filme_classificacao_score ON filme_classificacao_score_filme_classificacao_id = filme_classificacao_id LEFT JOIN user ON filme_classificacao_user_id = user_id WHERE filme_classificacao_filme_id = ? GROUP BY filme_classificacao_id ORDER BY filme_classificacao_data DESC", [user_id, user_id, req.params.filme_id], function (error, result, fields) {
         if (error) {
