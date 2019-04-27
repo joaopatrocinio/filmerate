@@ -338,4 +338,27 @@ router.get('/filme/reviews/:filme_id', function(req, res) {
     });
 })
 
+router.post('/privacy/change', function (req, res) {
+    if (req.body.user_privacy >= 1 && req.body.user_privacy <= 3) {
+        pool.query('UPDATE user SET user_privacy = ? WHERE user_id = ?', [req.body.user_privacy, user_id], function (error, result, fields) {
+            if (error) {
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error. Please try again."
+                })
+            }
+    
+            return res.status(200).send({
+                status: 200,
+                response: "Privacy settings changed successfully."
+            })
+        });
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Please include all neccessary data in your request and try again."
+        })
+    }
+})
+
 module.exports = router;
