@@ -15,8 +15,8 @@ router.use(function (req, res, next) {
     });
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) return res.status(500).send({
-            status: 500,
-            response: 'An error occured while trying to decode your access token. Please try again.'
+            status: 403,
+            response: 'Expired or invalid access token.'
         });
 
         user_id = decoded.id;
