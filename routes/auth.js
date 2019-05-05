@@ -30,7 +30,7 @@ router.post('/login', function(req, res, next) {
                     id: results[0].user_id,
                     user_type: results[0].user_user_type_id
                 }, process.env.JWT_SECRET, {
-                    expiresIn: 86400 // expires in 24 hours
+                    expiresIn: 6064800 // expires in 1 week
                 });
                 res.status(200).send({
                     status: 200,
