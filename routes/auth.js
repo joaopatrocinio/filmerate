@@ -64,7 +64,7 @@ router.get('/me', function (req, res, next) {
                 status: 500,
                 response: 'Database error. Please try again.'
             });
-            connection.query('SELECT user_id, user_firstname, user_lastname, user_email, user_user_type_id, user_data_nascimento, user_sexo_id, sexo_descricao, user_pais_id, pais_nome, user_privacy FROM user LEFT JOIN pais ON user.user_pais_id = pais.pais_id LEFT JOIN sexo ON user.user_sexo_id = sexo.sexo_id WHERE user_id = ?', [decoded.id], function (error, results, fields) {
+            connection.query('SELECT user_id, user_firstname, user_lastname, user_email, user_user_type_id, user_data_nascimento, user_sexo_id, sexo_descricao, user_pais_id, pais_nome, user_privacy, user_bio FROM user LEFT JOIN pais ON user.user_pais_id = pais.pais_id LEFT JOIN sexo ON user.user_sexo_id = sexo.sexo_id WHERE user_id = ?', [decoded.id], function (error, results, fields) {
                 if (!results[0]) {
                     return res.status(404).send({
                         status: 404,
