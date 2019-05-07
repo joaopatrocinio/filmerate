@@ -361,4 +361,33 @@ router.post('/privacy/change', function (req, res) {
     }
 })
 
+router.post('/profile/edit', function (req, res) {
+    var user_firstname = req.body.user_firstname;
+    var user_lastname = req.body.user_lastname;
+    var user_data_nascimento = moment(req.body.user_data_nascimento).format('YYYY-MM-DD');
+    var user_bio = req.body.user_bio;
+    var user_sexo_id = req.body.user_sexo_id;
+
+    if (user_firstname && user_lastname && user_data_nascimento && user_bio && user_sexo_id) {
+        pool.query('UPDATE user SET user_firstname = ?, user_lastname = ?, user_data_nascimento = ?, user_bio = ?, user_sexo_id = ? WHERE user_id = ?', [user_firstname, user_lastname, user_data_nascimento, user_bio, user_sexo_id, user_id], function (error, results, fields) {
+            if (error) {
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error."
+                });
+            } 
+            
+            return res.status(200).send({
+                status: 200,
+                response: "Update success."
+            })
+        });
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Invalid request."
+        })
+    }
+})
+
 module.exports = router;
