@@ -7,7 +7,7 @@ const faker = require('faker');
 const router = express.Router();
 
 // Route-wide middleware
-router.use(function (req, res, next) {
+/*router.use(function (req, res, next) {
     var token = req.headers['x-access-token'];
     if (!token) return res.status(401).send({
         status: 401,
@@ -16,7 +16,7 @@ router.use(function (req, res, next) {
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) return res.status(500).send({
             status: 500,
-            response: 'An error occured while trying to decode your access token. Please try again.'
+            response: 'Expired or invalid access token.'
         });
 
         // Admin account check
@@ -26,7 +26,7 @@ router.use(function (req, res, next) {
             response: 'Your account type is not allowed to make this request.'
         });
     })
-})
+})*/
 
 router.get("/faker/newUser", function (req, res) {
     var salt = bcrypt.genSaltSync(10);
@@ -125,7 +125,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
             mdb.movieInfo({
                 id: data.movie_results[0].id
             }, (err, movie) => {
-                pool.query('INSERT INTO filme (filme_imdb, filme_title, filme_sinopse, filme_data_estreia, filme_duracao, filme_poster, filme_ano) VALUES (?, ?, ?, ?, ?, ?, ?)', [movie.imdb_id, movie.original_title, movie.overview, moment(movie.release_date).format('YYYY-MM-DD'), movie.runtime, 'https://image.tmdb.org/t/p/w500' + movie.poster_path, moment(movie.release_date).format('YYYY')], function (error, results, fields) {
+                pool.query('INSERT INTO filme (filme_imdb, filme_title, filme_sinopse, filme_data_estreia, filme_duracao, filme_poster, filme_ano) VALUES (?, ?, ?, ?, ?, ?, ?)', [movie.imdb_id, movie.title, movie.overview, moment(movie.release_date).format('YYYY-MM-DD'), movie.runtime, 'https://image.tmdb.org/t/p/w500' + movie.poster_path, moment(movie.release_date).format('YYYY')], function (error, results, fields) {
                     if (error) {
                         if (error.errno == "1062") {
                             return res.status(500).send({
@@ -177,7 +177,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
                                     response: 'An error occured.'
                                 });
                             }
-        
+
                             if (!results[0]) {
                                 mdb.personInfo({
                                     id: credits.crew.find(isDirector).id
@@ -217,10 +217,10 @@ router.post('/scrape/:filme_imdb', function (req, res) {
                         for (i = 0; i < 3; i++) {
                             cast_id.push(credits.cast[i].id);
                         }
-        
+
                         // synchronously adding actors to the database
                         var index = 0;
-                    
+
                         function loadCast() {
                             if (index < cast_id.length) {
                                 pool.query('SELECT ator_id FROM ator WHERE ator_tmdb_id=?', [cast_id[index]], (error, results, fields) => {
@@ -230,7 +230,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
                                             response: 'An error occured.'
                                         });
                                     }
-                
+
                                     if (!results[0]) {
                                         mdb.personInfo({
                                             id: cast_id[index]

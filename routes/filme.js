@@ -1,6 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const sharp = require('sharp');
+const fs = require('fs');
+const http = require('http');
+const mdb = require('moviedb')(process.env.TMDB_API_KEY);
 const router= express.Router();
 
 router.get('/', function(req, res) {
@@ -24,6 +28,29 @@ router.get('/', function(req, res) {
     });
 })
 
+router.get('/trending', function (req, res) {
+    pool.query('SELECT filme_trending_id, filme_title, filme_poster FROM filme_trending LEFT JOIN filme ON filme_trending_filme_id = filme_id', function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({
+                status: 500,
+                response: "Database error. Please try again."
+            })
+        }
+
+        if (results[0]) {
+            return res.status(200).send({
+                status: 200,
+                response: results
+            })
+        } else {
+            return res.status(404).send({
+                status: 404,
+                response: "Trending movies not found."
+            })
+        }
+    });
+})
+
 router.get('/count', function (req, res) {
 	pool.query("SELECT COUNT(filme_id) AS 'filmes_count' FROM filme", function (error, results, fields) {
 		if (error) {
@@ -32,7 +59,7 @@ router.get('/count', function (req, res) {
 				response: "Database error. Please try again."
 			});
 		}
-		
+
 		return res.status(200).send({
 			status: 200,
 			response: results[0]
