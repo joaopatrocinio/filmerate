@@ -54,12 +54,10 @@ router.get('/trending', function(req, res) {
                 response: 'Reviews not found.'
             });
         }
-
         return res.status(200).send({
             status: 200,
             response: results
         });
-
     });
 })
 
