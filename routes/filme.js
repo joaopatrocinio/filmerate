@@ -1,10 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const sharp = require('sharp');
-const fs = require('fs');
-const http = require('http');
-const mdb = require('moviedb')(process.env.TMDB_API_KEY);
 const router= express.Router();
 
 router.get('/', function(req, res) {

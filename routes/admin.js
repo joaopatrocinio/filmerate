@@ -7,7 +7,7 @@ const faker = require('faker');
 const router = express.Router();
 
 // Route-wide middleware
-/*router.use(function (req, res, next) {
+router.use(function (req, res, next) {
     var token = req.headers['x-access-token'];
     if (!token) return res.status(401).send({
         status: 401,
@@ -26,7 +26,7 @@ const router = express.Router();
             response: 'Your account type is not allowed to make this request.'
         });
     })
-})*/
+})
 
 router.get("/faker/newUser", function (req, res) {
     var salt = bcrypt.genSaltSync(10);
@@ -282,6 +282,27 @@ router.post('/scrape/:filme_imdb', function (req, res) {
             });
         }
     });
+})
+
+router.get('/reports/list/all', function (req, res) {
+    pool.query('SELECT * FROM filme_report ORDER BY filme_report_data ASC', function (error, results) {
+        if (error) return res.status(500).send({
+            status: 500,
+            response: "Database error. Please try again."
+        })
+
+        if (results[0]) {
+            return res.status(200).send({
+                status: 200,
+                response: results
+            })
+        } else {
+            return res.status(404).send({
+                status: 404,
+                response: "Reports not found"
+            })
+        }
+    })
 })
 
 module.exports = router;
