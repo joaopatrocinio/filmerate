@@ -305,4 +305,25 @@ router.get('/reports/list/all', function (req, res) {
     })
 })
 
+router.post('/user/delete', function (req, res) {
+    if (req.body.user_id) {
+        pool.query('DELETE FROM user WHERE user_id = ?', [req.body.user_id], function (error, results) {
+            if (error) return res.status(500).send({
+                status: 500,
+                response: "Database error. Please try again."
+            })
+
+            return res.status(200).send({
+                status: 200,
+                response: "User deleted successfully."
+            })
+        })
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Please include all neccessary data to complete this request."
+        })
+    }
+})
+
 module.exports = router;
