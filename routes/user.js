@@ -347,7 +347,7 @@ router.post('/privacy/change', function (req, res) {
                     response: "Database error. Please try again."
                 })
             }
-    
+
             return res.status(200).send({
                 status: 200,
                 response: "Privacy settings changed successfully."
@@ -375,8 +375,8 @@ router.post('/profile/edit', function (req, res) {
                     status: 500,
                     response: "Database error."
                 });
-            } 
-            
+            }
+
             return res.status(200).send({
                 status: 200,
                 response: "Update success."
@@ -411,6 +411,20 @@ router.get('/reviews/users/:user_id', function (req, res) {
             })
         }
     });
+})
+
+router.get('/pais/list', function (req, res) {
+    pool.query('SELECT * FROM pais', function (error, results) {
+        if (error) return res.status(500).send({
+            status: 500,
+            response: "Database error. Please try again."
+        })
+
+        return res.status(200).send({
+            status: 200,
+            response: results
+        })
+    })
 })
 
 module.exports = router;
