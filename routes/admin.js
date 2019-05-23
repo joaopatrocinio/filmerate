@@ -83,6 +83,24 @@ router.get('/users', function (req, res) {
     });
 })
 
+router.get('/user/:user_id', function (req, res) {
+    if (req.params.user_id) {
+        pool.query('SELECT * FROM user WHERE user_id = ?', [req.params.user_id], function (error, results) {
+            if (error) {
+                return res.status(500).send({
+                    status: 500,
+                    response: 'Database error. Please try again.'
+                });
+            }
+
+            return res.status(200).send({
+                status: 200,
+                response: results
+            });
+        })
+    }
+})
+
 router.post('/filme/edit', function (req, res) {
     var filme_id = req.body.filme_id;
     var filme_title = req.body.filme_title;
@@ -322,6 +340,37 @@ router.post('/user/delete', function (req, res) {
         return res.status(400).send({
             status: 400,
             response: "Please include all neccessary data to complete this request."
+        })
+    }
+})
+
+router.post('/user/update', function (req, res) {
+    var user_id = req.body.user_id
+    var user_firstname = req.body.user_firstname;
+    var user_lastname = req.body.user_lastname;
+    var user_data_nascimento = moment(req.body.user_data_nascimento).format('YYYY-MM-DD');
+    var user_bio = req.body.user_bio;
+    var user_sexo_id = req.body.user_sexo_id;
+    var user_pais_id = req.body.user_pais_id;
+
+    if (user_id && user_firstname && user_lastname && user_data_nascimento && user_bio && user_sexo_id && user_pais_id) {
+        pool.query('UPDATE user SET user_firstname = ?, user_lastname = ?, user_data_nascimento = ?, user_bio = ?, user_sexo_id = ?, user_pais_id = ? WHERE user_id = ?', [user_firstname, user_lastname, user_data_nascimento, user_bio, user_sexo_id, user_pais_id, user_id], function (error, results, fields) {
+            if (error) {
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error."
+                });
+            }
+
+            return res.status(200).send({
+                status: 200,
+                response: "Update success."
+            })
+        });
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Invalid request."
         })
     }
 })
