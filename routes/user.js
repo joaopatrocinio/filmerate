@@ -428,4 +428,40 @@ router.get('/pais/list', function (req, res) {
     })
 })
 
+router.post('/review/delete', function (req, res) {
+    if (req.body.filme_classificacao_id) {
+        pool.query('SELECT filme_classificacao_user_id FROM filme_classificacao WHERE filme_classificacao_id = ?', [req.body.filme_classificacao_id], function (error, results) {
+            if (error) return res.status(500).send({
+                status: 500,
+                response: "Database error. Please try again."
+            })
+            if (results[0]) {
+                if (results[0].filme_classificacao_user_id == user_id) {
+                    pool.query('DELETE FROM filme_classificacao WHERE filme_classificacao_id = ?', [req.body.filme_classificacao_id], function (error, results) {
+                        if (error) return res.status(500).send({
+                            status: 500,
+                            response: "Database error. Please try again."
+                        })
+
+                        return res.status(200).send({
+                            status: 200,
+                            response: "Review deleted successfully."
+                        })
+                    })
+                }
+            } else {
+                return res.status(403).send({
+                    status: 403,
+                    response: "You can't delete someone else's review."
+                })
+            }
+        })
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Please include all necessary fields to complete this request"
+        })
+    }
+})
+
 module.exports = router;
