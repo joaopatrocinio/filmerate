@@ -357,7 +357,7 @@ router.post('/reports/accept', function (req, res) {
                     status: 500,
                     response: "Database error. Please try again."
                 })
-                
+
                 return res.status(200).send({
                     status: 200,
                     response: "The report was accepted and the report was removed from the database."
@@ -401,9 +401,10 @@ router.post('/user/update', function (req, res) {
     var user_bio = req.body.user_bio;
     var user_sexo_id = req.body.user_sexo_id;
     var user_pais_id = req.body.user_pais_id;
+    var user_user_type_id = req.body.user_user_type_id;
 
-    if (user_id && user_firstname && user_lastname && user_data_nascimento && user_sexo_id && user_pais_id) {
-        pool.query('UPDATE user SET user_firstname = ?, user_lastname = ?, user_data_nascimento = ?, user_bio = ?, user_sexo_id = ?, user_pais_id = ? WHERE user_id = ?', [user_firstname, user_lastname, user_data_nascimento, user_bio, user_sexo_id, user_pais_id, user_id], function (error, results, fields) {
+    if (user_id && user_firstname && user_lastname && user_data_nascimento && user_sexo_id && user_pais_id && user_user_type_id) {
+        pool.query('UPDATE user SET user_firstname = ?, user_lastname = ?, user_data_nascimento = ?, user_bio = ?, user_sexo_id = ?, user_pais_id = ?, user_user_type_id = ? WHERE user_id = ?', [user_firstname, user_lastname, user_data_nascimento, user_bio, user_sexo_id, user_pais_id, user_user_type_id, user_id], function (error, results, fields) {
             if (error) {
                 return res.status(500).send({
                     status: 500,
