@@ -323,6 +323,55 @@ router.get('/reports/list/all', function (req, res) {
     })
 })
 
+router.post('/reports/ignore', function (req, res) {
+    if (req.body.filme_report_id) {
+        pool.query('DELETE FROM filme_report WHERE filme_report_id = ?', [req.body.filme_report_id], function (error, results) {
+            if (error) return res.status(500).send({
+                status: 500,
+                response: "Database error. Please try again."
+            })
+
+            return res.status(200).send({
+                status: 200,
+                response: "Report removed from database. The review wasn't deleted."
+            })
+        })
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Please insert the report ID to ignore."
+        })
+    }
+})
+
+router.post('/reports/accept', function (req, res) {
+    if (req.body.filme_classificacao_id) {
+        pool.query('DELETE FROM filme_classificacao WHERE filme_classificacao_id = ?', [req.body.filme_classificacao_id], function (error, results) {
+            if (error) return res.status(500).send({
+                status: 500,
+                response: "Database error. Please try again."
+            })
+
+            pool.query('UPDATE filme_report SET filme_report_aceite = 1 WHERE filme_report_filme_classificacao_id = ?', [req.body.filme_classificacao_id], function (error, results) {
+                if (error) return res.status(500).send({
+                    status: 500,
+                    response: "Database error. Please try again."
+                })
+                
+                return res.status(200).send({
+                    status: 200,
+                    response: "The report was accepted and the report was removed from the database."
+                })
+            })
+        })
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Please insert all necessary data for the request."
+        })
+    }
+})
+
 router.post('/user/delete', function (req, res) {
     if (req.body.user_id) {
         pool.query('DELETE FROM user WHERE user_id = ?', [req.body.user_id], function (error, results) {
