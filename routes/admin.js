@@ -303,7 +303,7 @@ router.post('/scrape/:filme_imdb', function (req, res) {
 })
 
 router.get('/reports/list/all', function (req, res) {
-    pool.query('SELECT * FROM filme_report ORDER BY filme_report_data ASC', function (error, results) {
+    pool.query('SELECT * FROM filme_report LEFT JOIN filme_classificacao ON filme_report_filme_classificacao_id = filme_classificacao_id ORDER BY filme_report_data ASC', function (error, results) {
         if (error) return res.status(500).send({
             status: 500,
             response: "Database error. Please try again."
