@@ -375,4 +375,90 @@ router.post('/user/update', function (req, res) {
     }
 })
 
+router.post('/filme/trending/remove', function (req, res) {
+    if (req.body.filme_id) {
+        pool.query('DELETE FROM filme_trending WHERE filme_trending_filme_id = ?', [req.body.filme_id], function (error, results) {
+            if (error) return res.status(500).send({
+                status: 500,
+                response: "Database error. Please try again."
+            })
+            return res.status(200).send({
+                status: 200,
+                response: "Movie removed successfully from trending table."
+            })
+        })
+    } else {
+        return res.status(400).send({
+            status: 400,
+            response: "Please inclue the movie ID to remove it from the trending table."
+        })
+    }
+})
+
+router.post('/filme/trending/insert', function (req, res) {
+    if (parseInt(req.body.filme_id)) {
+        pool.query("INSERT INTO filme_trending (filme_trending_filme_id) VALUES (?)", [req.body.filme_id], function (error, results, fields) {
+            if (error) {
+                if (error.errno == "1062") {
+                    return res.status(400).send({
+                        status: 400,
+                        response: "Movie already on trending."
+                    });
+                }
+
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error. Please try again."
+                })
+            }
+
+            return res.status(200).send({
+                status: 200,
+                response: "Movie added successfully to the trending list."
+            })
+        });
+    } else {
+        return res.status(500).send({
+            status: 400,
+            response: 'You must include the movie ID in the body of the request.'
+        })
+    }
+})
+
+router.get('/filme/trending/check', function (req, res) {
+    if (parseInt(req.body.filme_id)) {
+        pool.query("SELECT * FROM filme_trending WHERE filme_trending_filme_id = ?", [req.body.filme_id], function (error, results, fields) {
+            if (error) {
+                return res.status(500).send({
+                    status: 500,
+                    response: "Database error. Please try again."
+                })
+            }
+
+            if (results[0]) {
+                return res.status(200).send({
+                    status: 200,
+                    response: {
+                        filme_id: parseInt(req.body.filme_id),
+                        trending: true
+                    }
+                })
+            } else {
+                return res.status(200).send({
+                    status: 200,
+                    response: {
+                        filme_id: parseInt(req.body.filme_id),
+                        trending: false
+                    }
+                })
+            }
+        })
+    } else {
+        return res.status(500).send({
+            status: 400,
+            response: 'You must include the movie ID in the body of the request.'
+        })
+    }
+})
+
 module.exports = router;
