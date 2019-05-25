@@ -425,7 +425,7 @@ router.post('/filme/trending/insert', function (req, res) {
     }
 })
 
-router.get('/filme/trending/check', function (req, res) {
+router.post('/filme/trending/check', function (req, res) {
     if (parseInt(req.body.filme_id)) {
         pool.query("SELECT * FROM filme_trending WHERE filme_trending_filme_id = ?", [req.body.filme_id], function (error, results, fields) {
             if (error) {
