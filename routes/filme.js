@@ -25,7 +25,7 @@ router.get('/', function(req, res) {
 })
 
 router.get('/trending', function (req, res) {
-    pool.query('SELECT filme_trending_id, filme_title, filme_poster FROM filme_trending LEFT JOIN filme ON filme_trending_filme_id = filme_id', function (error, results, fields) {
+    pool.query('SELECT filme_trending_id, filme_trending_filme_id, filme_title, filme_poster FROM filme_trending LEFT JOIN filme ON filme_trending_filme_id = filme_id', function (error, results, fields) {
         if (error) {
             return res.status(500).send({
                 status: 500,
