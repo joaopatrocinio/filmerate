@@ -369,7 +369,7 @@ router.post('/profile/edit', function (req, res) {
     var user_sexo_id = req.body.user_sexo_id;
     var user_pais_id = req.body.user_pais_id;
 
-    if (user_firstname && user_lastname && user_data_nascimento && user_bio && user_sexo_id && user_pais_id) {
+    if (user_firstname && user_lastname && user_data_nascimento && user_sexo_id && user_pais_id) {
         pool.query('UPDATE user SET user_firstname = ?, user_lastname = ?, user_data_nascimento = ?, user_bio = ?, user_sexo_id = ?, user_pais_id = ? WHERE user_id = ?', [user_firstname, user_lastname, user_data_nascimento, user_bio, user_sexo_id, user_pais_id, user_id], function (error, results, fields) {
             if (error) {
                 return res.status(500).send({
